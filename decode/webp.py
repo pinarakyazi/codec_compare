@@ -8,7 +8,7 @@ img_enc  = sys.argv[1]
 img_dec  = sys.argv[2]
 
 webp_bin = '/tools/libwebp-1.0.0-linux-x86-64/bin/dwebp'
-cmd      = [webp_bin, img_enc, "-ppm", "-o", img_dec]
+cmd      = [webp_bin, img_enc, "-yuv", "-o", img_dec]
 
 print " ".join(cmd)
 try:

@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y \
     python \
     vim \
     exuberant-ctags \
-    imagemagick
+    imagemagick \
+    python-plotly
 
 # JPEG
 RUN mkdir -p /tools && \
@@ -89,8 +90,8 @@ RUN mkdir -p /tools && \
     tar xvzf HDRTools-0.18-dev.tar.gz && \
     rm -f HDRTools-0.18-dev.tar.gz && \
     cd HDRTools-0.18-dev && \
-    make 		
-    
+    make
+
 # TO ADD ANOTHER
 # ADD /local/path/to/bin /tools/bin
 # ^ This will add the file from the host machine into the container. In this case the bin is accessible at: `/tools/bin`.

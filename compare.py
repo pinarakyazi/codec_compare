@@ -106,7 +106,7 @@ def decode(decoder, encoded_image, width, height, pix_fmt, depth):
     elif pix_fmt == 'tif':
         ext_name = '.tif'
     if 'webp' in decoder and ext_name == '.yuv':
-        ext_name = '.ppm'
+        ext_name = '.yuv'
     decoded_image = os.path.join(output_dir, os.path.basename(encoded_image) + ext_name)
     if os.path.isfile(decoded_image):
         print "\033[92m[DECODE OK]\033[0m " + decoded_image
@@ -599,7 +599,7 @@ def main():
                     else:
                         if convertflag:
                             if codecname == 'webp':
-                                metrics = compute_metrics_SDR(image, decoded_image, encoded_image, bpp_target, codec, width, height, pix_fmt, depth)
+                                metrics = compute_metrics_SDR(derivative_image, decoded_image, encoded_image, bpp_target, codec, width, height, pix_fmt, depth)
                             elif codecname == 'jpeg':
                                 if 'classB' in classname:
                                     metrics = compute_metrics_SDR(derivative_image, decoded_image, encoded_image, bpp_target, codec, width, height, pix_fmt, depth)
