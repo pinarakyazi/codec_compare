@@ -31,7 +31,7 @@ for i in range(0, int(math.floor(math.log(qty_max)/math.log(2)))):
     if pix_fmt == 'pfm':
         fixQual = '80'
         cmd = [jpg_bin, '-q', str(quality), '-Q', str(quality), '-qt', '3', '-h', '-profile', 'c', '-rR', '4',
-            image_src, image_out]
+               image_src, image_out]
     elif int(depth) > 8 and (pix_fmt == 'ppm' or pix_fmt == "yuv444p" or pix_fmt == 'pgm' or pix_fmt == 'tif'):
         if int(depth) == 10:
             cmd = [jpg_bin, '-qt', '3', '-h', '-q', str(quality), '-R', '2',
@@ -58,11 +58,11 @@ for i in range(0, int(math.floor(math.log(qty_max)/math.log(2)))):
     except subprocess.CalledProcessError as e:
         print e.output
         sys.exit(1)
-
+    
     size = os.path.getsize(image_out) * 8
     bpp  = float(size) / float((int(width) * int(height)))
     print quality, step, size, bpp, bpp_target
-
+    
     quality += step * (1 if (bpp < float(bpp_target)) else -1)
     step /= 2
 
