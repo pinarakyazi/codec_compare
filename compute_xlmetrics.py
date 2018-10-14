@@ -606,7 +606,7 @@ def main():
                             metrics = compute_metrics_SDR(original_image, decoded_image, encoded_image, bpp_target,
                                                           codecname, width,
                                                           height, imgfmt, depth)
-                        measured_bpp = (os.path.getsize(encoded_image) * int(depth)) / (float((int(width) * int(height))))
+                        measured_bpp = (os.path.getsize(encoded_image) * 1.024 * 8) / (float((int(width) * int(height))))
                         bpp_target_metrics[measured_bpp] = metrics
                     else:
                         continue
