@@ -97,7 +97,7 @@ def decode(decoder, encoded_image, width, height, pix_fmt, depth):
     decode_script = os.path.join('./decode/', decoder)
     if pix_fmt == "ppm":
         ext_name = '.ppm'
-    elif pix_fmt == "yuv420p":
+    elif pix_fmt == "yuv420p" or pix_fmt == "yuv420p_0":
         ext_name = '.yuv'
     elif pix_fmt == "pfm":
         ext_name = '.pfm'
@@ -133,9 +133,6 @@ def create_derivatives(image, classname):
     name = os.path.basename(image).split(".")[0]
     derivative_images = []
 
-    yuv_dir = os.path.join('derivative_images', 'yuv420p')
-    yuv_dest = os.path.join(yuv_dir, name + '.yuv')
-    
     ppm_dir = os.path.join('derivative_images', 'ppm')
     ppm_dest = os.path.join(ppm_dir, name + '.ppm')
     
@@ -166,24 +163,27 @@ def create_derivatives(image, classname):
         derivative_images.append((ppm_dest, 'ppm'))
         return derivative_images
     
-    if not os.path.isfile(yuv_dest):
-        try:
-            print "\033[92m[YUV420]\033[0m " + yuv_dest
-            mkdir_p(yuv_dir)
-            cmd = [HDRTools_dir, '-f', ppm_to_yuv_cfg, '-p', 'SourceFile=%s' % image, '-p', 'SourceWidth=%s' % width,
-                   '-p', 'SourceHeight=%s' % height, '-p', 'SourceBitDepthCmp0=%s' % depth, '-p', 'SourceBitDepthCmp1=%s'
-                   % depth, '-p', 'SourceBitDepthCmp2=%s' % depth, '-p', 'SourceColorPrimaries=%s' % primary, '-p',
-                   'OutputFile=%s' % yuv_dest, '-p', 'OutputWidth=%s' % width, '-p', 'OutputHeight=%s' % height, '-p',
-                   'OutputBitDepthCmp0=%s' % depth, '-p', 'OutputBitDepthCmp1=%s' % depth, '-p', 'OutputBitDepthCmp2=%s'
-                   % depth, '-p', 'OutputColorPrimaries=%s' % primary]
-            subprocess.check_output(' '.join(cmd), stderr=subprocess.STDOUT, shell=True)
-        except subprocess.CalledProcessError as e:
-            print cmd, e.output
-            raise e
-    else:
-        print "\033[92m[YUV420 OK]\033[0m " + yuv_dest
+    for pix_fmt, log, output_sample_range in [('yuv420p', 'YUV420', 1), ('yuv420p_0', 'YUV420_0', 0)]: 
+        yuv_dir = os.path.join('derivative_images', pix_fmt)
+        yuv_dest = os.path.join(yuv_dir, name + '.yuv')
+        if not os.path.isfile(yuv_dest):
+            try:
+                print ("\033[92m[%s]\033[0m " % log) + yuv_dest
+                mkdir_p(yuv_dir)
+                cmd = [HDRTools_dir, '-f', ppm_to_yuv_cfg, '-p', 'SourceFile=%s' % image, '-p', 'SourceWidth=%s' % width,
+                    '-p', 'SourceHeight=%s' % height, '-p', 'SourceBitDepthCmp0=%s' % depth, '-p', 'SourceBitDepthCmp1=%s'
+                    % depth, '-p', 'SourceBitDepthCmp2=%s' % depth, '-p', 'SourceColorPrimaries=%s' % primary, '-p',
+                    'OutputFile=%s' % yuv_dest, '-p', 'OutputWidth=%s' % width, '-p', 'OutputHeight=%s' % height, '-p',
+                    'OutputBitDepthCmp0=%s' % depth, '-p', 'OutputBitDepthCmp1=%s' % depth, '-p', 'OutputBitDepthCmp2=%s'
+                    % depth, '-p', 'OutputColorPrimaries=%s' % primary, '-p', 'OutputSampleRange=%d' % output_sample_range ]
+                subprocess.check_output(' '.join(cmd), stderr=subprocess.STDOUT, shell=True)
+            except subprocess.CalledProcessError as e:
+                print cmd, e.output
+                raise e
+        else:
+            print ("\033[92m[%s OK]\033[0m " % log) + yuv_dest
 
-    derivative_images.append((yuv_dest, 'yuv420p'))
+        derivative_images.append((yuv_dest, pix_fmt))
 
     if not os.path.isfile(ppm_dest):
         try:
@@ -261,10 +261,14 @@ def main():
                 codecname = os.path.splitext(codec)[0]
                 convertflag = 1
                 caseflag = pix_fmt
-                if codecname == 'webp' and pix_fmt != 'yuv420p':
+                if codecname == 'webp' and (pix_fmt != 'yuv420p_0' or
+                                            depth != '8'):
                     continue
-                if codecname == 'webp' and depth != '8':
-                    continue
+                if pix_fmt == 'yuv420p_0':
+                    if codecname != 'webp':
+                        continue
+                    # This is to keep the current behavior in compute_xlmetrics.py
+                    pix_fmt = 'yuv420p'
                 if codecname == 'kakadu' and classname[:6] == 'classB':
                     convertflag = 0
                     caseflag = imgfmt
